@@ -23,7 +23,7 @@ VSUBDIRS = hdl buildroot linux u-boot-xlnx
 
 VERSION=$(shell git describe --abbrev=4 --dirty --always --tags)
 LATEST_TAG=$(shell git describe --abbrev=0 --tags)
-UBOOT_VERSION=$(shell echo -n "PlutoSDR " && cd u-boot-xlnx && git describe --abbrev=0 --dirty --always --tags)
+UBOOT_VERSION=$(shell echo -n "ANTSDR " && cd u-boot-xlnx && git describe --abbrev=0 --dirty --always --tags)
 HAVE_VIVADO= $(shell bash -c "source $(VIVADO_SETTINGS) > /dev/null 2>&1 && vivado -version > /dev/null 2>&1 && echo 1 || echo 0")
 XSA_URL ?= http://github.com/analogdevicesinc/plutosdr-fw/releases/download/${LATEST_TAG}/system_top.xsa
 
@@ -38,8 +38,8 @@ $(error "      3] export VIVADO_VERSION=v20xx.x")
 	endif
 endif
 
-TARGET ?= pluto
-SUPPORTED_TARGETS:=pluto sidekiqz2
+TARGET ?= ant
+SUPPORTED_TARGETS:=pluto sidekiqz2 ant
 
 # Include target specific constants
 include scripts/$(TARGET).mk
@@ -59,7 +59,7 @@ endif
 
 ifeq ($(findstring $(TARGET),$(SUPPORTED_TARGETS)),)
 all:
-	@echo "Invalid `TARGET variable ; valid values are: pluto, sidekiqz2" &&
+	@echo "Invalid `TARGET variable ; valid values are: pluto, sidekiqz2,ant" &&
 	exit 1
 else
 all: clean-build $(TARGETS) zip-all legal-info
@@ -106,7 +106,7 @@ build/zImage: linux/arch/arm/boot/zImage  | build
 
 ### Device Tree ###
 
-linux/arch/arm/boot/dts/%.dtb: linux/arch/arm/boot/dts/%.dts  linux/arch/arm/boot/dts/zynq-pluto-sdr.dtsi
+linux/arch/arm/boot/dts/%.dtb: linux/arch/arm/boot/dts/%.dts  linux/arch/arm/boot/dts/zynq-ant-sdr.dtsi
 	DTC_FLAGS=-@ make -C linux -j $(NCORES) ARCH=arm CROSS_COMPILE=$(CROSS_COMPILE) $(notdir $@)
 
 build/%.dtb: linux/arch/arm/boot/dts/%.dtb | build
@@ -139,6 +139,7 @@ else ifneq ($(XSA_FILE),)
 	cp $(XSA_FILE) $@
 else ifneq ($(XSA_URL),)
 	wget -T 3 -t 1 -N --directory-prefix build $(XSA_URL)
+endif
 endif
 
 ### TODO: Build system_top.xsa from src if dl fails ...
