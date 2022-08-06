@@ -145,7 +145,6 @@ else ifneq ($(XSA_FILE),)
 else ifneq ($(XSA_URL),)
 	wget -T 3 -t 1 -N --directory-prefix build $(XSA_URL)
 endif
-endif
 
 ### TODO: Build system_top.xsa from src if dl fails ...
 
