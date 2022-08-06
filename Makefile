@@ -199,7 +199,7 @@ SDIMGDIR = $(CURDIR)/build_sdimg
 sdimg: build/
 	mkdir $(SDIMGDIR)
 	cp build/sdk/fsbl/Release/fsbl.elf 	$(SDIMGDIR)/fsbl.elf  
-	cp build/sdk/hw_0/system_top.bit 	$(SDIMGDIR)/system_top.bit
+	cp build/system_top.bit 		$(SDIMGDIR)/system_top.bit
 	cp build/u-boot.elf 			$(SDIMGDIR)/u-boot.elf
 	cp $(CURDIR)/linux/arch/arm/boot/uImage	$(SDIMGDIR)/uImage
 	cp build/zynq-$(TARGET)-sdr.dtb 	$(SDIMGDIR)/devicetree.dtb
@@ -207,8 +207,8 @@ sdimg: build/
 	cp build/rootfs.cpio.gz  		$(SDIMGDIR)/ramdisk.image.gz
 	mkimage -A arm -T ramdisk -C gzip -d $(SDIMGDIR)/ramdisk.image.gz $(SDIMGDIR)/uramdisk.image.gz
 	touch 	$(SDIMGDIR)/boot.bif
-	echo "image : {[bootloader] $(SDIMGDIR)/fsbl.elf  $(SDIMGDIR)/system_top.bit  $(SDIMGDIR)/u-boot.elf}" >  $(SDIMGDIR)/boot.bif
-	bash -c "source $(VIVADO_SETTINGS) && bootgen -image $(SDIMGDIR)/boot.bif -o i $(SDIMGDIR)/BOOT.bin"
+	echo "all : {[bootloader] $(SDIMGDIR)/fsbl.elf  $(SDIMGDIR)/system_top.bit  $(SDIMGDIR)/u-boot.elf}" >  $(SDIMGDIR)/boot.bif
+	bash -c "source $(VIVADO_SETTINGS) && bootgen -image $(SDIMGDIR)/boot.bif -o $(SDIMGDIR)/BOOT.bin"
 	rm $(SDIMGDIR)/fsbl.elf
 	rm $(SDIMGDIR)/system_top.bit
 	rm $(SDIMGDIR)/u-boot.elf
