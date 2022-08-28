@@ -8,7 +8,7 @@
 	branch = antsdr
 [submodule "linux"]
 	path = linux
-	url = https://github.com/MicroPhase/linux
+	url = https://github.com/catkira/linux
 	branch = antsdr
 [submodule "hdl"]
 	path = hdl
