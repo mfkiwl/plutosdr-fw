@@ -95,9 +95,9 @@ build/uboot-env.bin: build/uboot-env.txt
 ### Linux ###
 
 linux/arch/arm/boot/zImage:
-	make -C linux ARCH=arm zynq_$(TARGET)_defconfig
-	make -C linux -j $(NCORES) ARCH=arm CROSS_COMPILE=$(CROSS_COMPILE) uImage UIMAGE_LOADADDR=0x8000
-	make -C linux -j $(NCORES) ARCH=arm CROSS_COMPILE=$(CROSS_COMPILE) zImage UIMAGE_LOADADDR=0x8000
+	make -C linux ARCH=arm KCFLAGS="-mcpu=cortex-a9 -mfpu=vfpv4 -mfloat-abi=soft -O2" zynq_$(TARGET)_defconfig
+	make -C linux -j $(NCORES) ARCH=arm KCFLAG"-mcpu=cortex-a9 -mfpu=vfpv4 -mfloat-abi=soft -O2" CROSS_COMPILE=$(CROSS_COMPILE) uImage UIMAGE_LOADADDR=0x8000
+	make -C linux -j $(NCORES) ARCH=arm KCFLAGS="-mcpu=cortex-a9 -mfpu=vfpv4 -mfloat-abi=soft -O2" CROSS_COMPILE=$(CROSS_COMPILE) zImage UIMAGE_LOADADDR=0x8000
 
 .PHONY: linux/arch/arm/boot/zImage
 .PHONY: linux/arch/arm/boot/uImage
@@ -112,7 +112,7 @@ build/uImage: linux/arch/arm/boot/uImage  | build
 ### Device Tree ###
 
 linux/arch/arm/boot/dts/%.dtb: linux/arch/arm/boot/dts/%.dts  linux/arch/arm/boot/dts/zynq-ant-sdr.dtsi
-	DTC_FLAGS=-@ make -C linux -j $(NCORES) ARCH=arm CROSS_COMPILE=$(CROSS_COMPILE) $(notdir $@)
+	DTC_FLAGS=-@ make -C linux -j $(NCORES) ARCH=arm KCFLAGS="-mcpu=cortex-a9 -mfpu=vfpv4 -mfloat-abi=soft -O2" CROSS_COMPILE=$(CROSS_COMPILE) $(notdir $@)
 
 build/%.dtb: linux/arch/arm/boot/dts/%.dtb | build
 	dtc -q -@ -I dtb -O dts $< | sed 's/axi {/amba {/g' | dtc -q -@ -I dts -O dtb -o $@
@@ -121,6 +121,7 @@ build/%.dtb: linux/arch/arm/boot/dts/%.dtb | build
 
 buildroot/output/images/rootfs.cpio.gz:
 	@echo device-fw $(VERSION)> $(CURDIR)/buildroot/board/$(TARGET)/VERSIONS
+	# grabbing these versions with git describe is super slow
 	@$(foreach dir,$(VSUBDIRS),echo $(dir) $(shell cd $(dir) && git describe --abbrev=4 --dirty --always --tags) >> $(CURDIR)/buildroot/board/$(TARGET)/VERSIONS;)
 	make -C buildroot ARCH=arm zynq_$(TARGET)_defconfig
 	make -C buildroot legal-info
@@ -148,6 +149,7 @@ endif
 
 ### TODO: Build system_top.xsa from src if dl fails ...
 
+# TODO use grouped target here when make supports it
 build/sdk/fsbl/Release/fsbl.elf build/system_top.bit : build/system_top.xsa
 	rm -Rf build/sdk
 ifeq (1, ${HAVE_VIVADO})
@@ -196,9 +198,15 @@ clean:
 	rm -rf build_sdimg
 
 SDIMGDIR = $(CURDIR)/build_sdimg
-sdimg: build/
-	mkdir $(SDIMGDIR)
-	cp build/sdk/fsbl/Release/fsbl.elf 	$(SDIMGDIR)/fsbl.elf  
+# sdimg is just a dummy target for easy invocation
+# grouped targets are only supported starting with make 4.3
+# sdimg $(SDIMGDIR)/BOOT.bin $(SDIMGDIR)/uEnv.txt $(SDIMGDIR)/devicetree.dtb $(SDIMGDIR)/uImage &: build/sdk/fsbl/Release/fsbl.elf build/system_top.bit build/u-boot.elf $(CURDIR)/linux/arch/arm/boot/uImage build/zynq-$(TARGET)-sdr.dtb build/uboot-env.txt build/rootfs.cpio.gz
+build_%/sdimg build_%/BOOT.bin build_%/uEnv.txt build_%/devicetree.dtb build_%/uImage : build/sdk/fsbl/Release/fsbl.elf build/system_top.bit build/u-boot.elf $(CURDIR)/linux/arch/arm/boot/uImage build/zynq-$(TARGET)-sdr.dtb build/uboot-env.txt build/rootfs.cpio.gz
+#$(SDIMGDIR) : build/sdk/fsbl/Release/fsbl.elf build/system_top.bit build/u-boot.elf $(CURDIR)/linux/arch/arm/boot/uImage build/zynq-$(TARGET)-sdr.dtb build/uboot-env.txt build/rootfs.cpio.gz
+	if [ ! -d $(SDIMGDIR) ]; then \
+		mkdir $(SDIMGDIR); \
+	fi
+	cp build/sdk/fsbl/Release/fsbl.elf 	$(SDIMGDIR)/fsbl.elf
 	cp build/system_top.bit 		$(SDIMGDIR)/system_top.bit
 	cp build/u-boot.elf 			$(SDIMGDIR)/u-boot.elf
 	cp $(CURDIR)/linux/arch/arm/boot/uImage	$(SDIMGDIR)/uImage
@@ -214,8 +222,8 @@ sdimg: build/
 	rm $(SDIMGDIR)/u-boot.elf
 	rm $(SDIMGDIR)/ramdisk.image.gz 
 	rm $(SDIMGDIR)/boot.bif
-
-
+	touch $(SDIMGDIR)
+	touch $(SDIMGDIR)/sdimg # this is needed so that all targets have timestamps
 
 zip-all: $(TARGETS)
 	zip -j build/$(ZIP_ARCHIVE_PREFIX)-fw-$(VERSION).zip $^
