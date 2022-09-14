@@ -1,10 +1,10 @@
 [submodule "u-boot-xlnx"]
 	path = u-boot-xlnx
-	url = https://github.com/MicroPhase/u-boot-xlnx.git
+	url = https://github.com/MicroPhase/u-boot-xlnx
 	branch =  antsdr
 [submodule "buildroot"]
 	path = buildroot
-	url = https://github.com/catkira/buildroot.git
+	url = git@github.com:catkira/xbuildroot.git
 	branch = antsdr
 [submodule "linux"]
 	path = linux
@@ -12,5 +12,5 @@
 	branch = antsdr
 [submodule "hdl"]
 	path = hdl
-	url = https://github.com/catkira/adi-hdl
+	url = git@github.com:catkira/xhdl.git
 	branch = antsdr
