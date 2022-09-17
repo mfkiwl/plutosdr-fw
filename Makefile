@@ -95,8 +95,8 @@ build/uboot-env.bin: build/uboot-env.txt
 ### Linux ###
 
 linux/arch/arm/boot/zImage:
-	make -C linux ARCH=arm zynq_$(TARGET)_defconfig
-	make -C linux -j $(NCORES) ARCH=arm CROSS_COMPILE=$(CROSS_COMPILE) zImage UIMAGE_LOADADDR=0x8000
+	make -C linux ARCH=arm KCFLAGS"-mfpu=vfpv4 -mfloat-abi=soft -O2" zynq_$(TARGET)_defconfig
+	make -C linux -j $(NCORES) ARCH=arm KCFLAGS"-mfpu=vfpv4 -mfloat-abi=soft -O2" CROSS_COMPILE=$(CROSS_COMPILE) zImage UIMAGE_LOADADDR=0x8000
 
 .PHONY: linux/arch/arm/boot/zImage
 
@@ -107,7 +107,7 @@ build/zImage: linux/arch/arm/boot/zImage  | build
 ### Device Tree ###
 
 linux/arch/arm/boot/dts/%.dtb: linux/arch/arm/boot/dts/%.dts  linux/arch/arm/boot/dts/zynq-pluto-sdr.dtsi
-	DTC_FLAGS=-@ make -C linux -j $(NCORES) ARCH=arm CROSS_COMPILE=$(CROSS_COMPILE) $(notdir $@)
+	DTC_FLAGS=-@ make -C linux -j $(NCORES) ARCH=arm KCFLAGS"-mfpu=vfpv4 -mfloat-abi=soft -O2" CROSS_COMPILE=$(CROSS_COMPILE) $(notdir $@)
 
 build/%.dtb: linux/arch/arm/boot/dts/%.dtb | build
 	dtc -q -@ -I dtb -O dts $< | sed 's/axi {/amba {/g' | dtc -q -@ -I dts -O dtb -o $@
