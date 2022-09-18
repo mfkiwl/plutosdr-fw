@@ -95,9 +95,9 @@ build/uboot-env.bin: build/uboot-env.txt
 ### Linux ###
 
 linux/arch/arm/boot/zImage:
-	make -C linux ARCH=arm KCFLAGS="-mcpu=cortex-a9 -mfpu=vfpv4 -mfloat-abi=soft -O2" zynq_$(TARGET)_defconfig
-	make -C linux -j $(NCORES) ARCH=arm KCFLAGS"-mcpu=cortex-a9 -mfpu=vfpv4 -mfloat-abi=soft -O2" CROSS_COMPILE=$(CROSS_COMPILE) uImage UIMAGE_LOADADDR=0x8000
-	make -C linux -j $(NCORES) ARCH=arm KCFLAGS="-mcpu=cortex-a9 -mfpu=vfpv4 -mfloat-abi=soft -O2" CROSS_COMPILE=$(CROSS_COMPILE) zImage UIMAGE_LOADADDR=0x8000
+	make -C linux ARCH=arm KCFLAGS="-mfpu=vfpv4 -mfloat-abi=soft -O2" zynq_$(TARGET)_defconfig
+	make -C linux -j $(NCORES) ARCH=arm KCFLAGS"-mfpu=vfpv4 -mfloat-abi=soft -O2" CROSS_COMPILE=$(CROSS_COMPILE) uImage UIMAGE_LOADADDR=0x8000
+	make -C linux -j $(NCORES) ARCH=arm KCFLAGS="-mfpu=vfpv4 -mfloat-abi=soft -O2" CROSS_COMPILE=$(CROSS_COMPILE) zImage UIMAGE_LOADADDR=0x8000
 
 .PHONY: linux/arch/arm/boot/zImage
 .PHONY: linux/arch/arm/boot/uImage
