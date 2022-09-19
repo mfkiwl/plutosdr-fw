@@ -62,7 +62,7 @@ all:
 	@echo "Invalid `TARGET variable ; valid values are: pluto, sidekiqz2,ant" &&
 	exit 1
 else
-all: clean-build $(TARGETS) zip-all legal-info
+all: clean-build $(TARGETS) zip-all legal-info build_sdimg/sdimg
 endif
 
 .NOTPARALLEL: all
