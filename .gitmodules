@@ -9,8 +9,8 @@
 [submodule "linux"]
 	path = linux
 	url = https://github.com/catkira/linux
-	branch = antsdr
+	branch = antsdr_new
 [submodule "hdl"]
 	path = hdl
 	url = git@github.com:catkira/xhdl.git
-	branch = antsdr
+	branch = antsdr_new
